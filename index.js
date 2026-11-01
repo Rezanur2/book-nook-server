@@ -19,7 +19,14 @@ export async function connectToMongoDB() {
     console.dir(err);
   }
 }
-connectToMongoDB();
+const clientConnect = await connectToMongoDB();
+const db = clientConnect.db('book-nook');  
+const booksCollection = db.collection('books');
+
+app.get('/books', async (req, res) => { 
+  const result = await booksCollection.find().toArray();
+  res.send(result);
+})
 
 app.get("/", (req, res) => {
     res.send('Hello World!')
