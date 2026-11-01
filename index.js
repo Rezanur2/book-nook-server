@@ -6,7 +6,7 @@ import { MongoClient } from 'mongodb';
 const PORT = process.env.PORT || 5000;
 const app = express();
 
-app.use(cors());
+app.use(cors(["http://localhost:3000"]));
 app.use(express.json());
 
 const client = new MongoClient(process.env.MONGODB_URI);
@@ -22,6 +22,12 @@ export async function connectToMongoDB() {
 const clientConnect = await connectToMongoDB();
 const db = clientConnect.db('book-nook');  
 const booksCollection = db.collection('books');
+
+app.post('/books', async (req, res) => { 
+  const bookData = req.body;
+  const result = await booksCollection.insertOne(bookData);
+  res.send(result);
+})
 
 app.get('/books', async (req, res) => { 
   const result = await booksCollection.find().toArray();
