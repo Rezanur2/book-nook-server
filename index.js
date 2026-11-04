@@ -34,6 +34,12 @@ app.get('/books', async (req, res) => {
   res.send(result);
 })
 
+app.get('/my-books/:email', async (req, res) => {
+  const email = req.params.email;
+  const result = await booksCollection.find({ creatorEmail: email }).toArray();
+  res.send(result);
+})
+
 app.get('/books/:id', async (req, res) => {
   const id = req.params.id;
   const result = await booksCollection.findOne({ _id: new ObjectId(id) });
