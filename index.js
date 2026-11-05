@@ -49,6 +49,13 @@ app.patch('/books/:id', async (req, res) => {
   res.send(result)
 })
 
+// DELETE /books/:id — delete a book
+app.delete('/books/:id', async (req, res) => {
+  const id = req.params.id;
+  const result = await booksCollection.deleteOne({ _id: new ObjectId(id) });
+  res.json(result);
+})
+
 // GET /books/:id — get one book
 app.get('/books/:id', async (req, res) => {
   const id = req.params.id;
