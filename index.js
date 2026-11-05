@@ -78,6 +78,13 @@ app.get('/borrows', async (req, res) => {
   res.send(result);
 })
 
+// DELETE /borrows/:id — return a book
+app.delete('/borrows/:id', async (req, res) => {
+  const id = req.params.id;
+  const result = await borrowCollection.deleteOne({ _id: new ObjectId(id) });
+  res.send(result);
+})
+
 app.get("/", (req, res) => {
     res.send('Hello World!')
 })
