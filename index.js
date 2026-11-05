@@ -22,6 +22,7 @@ export async function connectToMongoDB() {
 const clientConnect = await connectToMongoDB();
 const db = clientConnect.db('book-nook');  
 const booksCollection = db.collection('books');
+const borrowCollection = db.collection('borrows')
 
 // POST /books — add a book
 app.post('/books', async (req, res) => { 
@@ -62,6 +63,14 @@ app.get('/books/:id', async (req, res) => {
   const result = await booksCollection.findOne({ _id: new ObjectId(id) });
   res.send(result);
 })
+
+// POST /borrows — borrow a book
+app.post('/borrows', async(req, res) => {
+  const data = req.body;
+  const result = await borrowCollection.insertOne(data);
+  res.send(result);
+})
+
 
 app.get("/", (req, res) => {
     res.send('Hello World!')
