@@ -71,6 +71,12 @@ app.post('/borrows', async(req, res) => {
   res.send(result);
 })
 
+// GET /borrows — get the borrows of the logged in user
+app.get('/borrows', async (req, res) => {
+  const email = req.query.email;
+  const result = await borrowCollection.find({userEmail:email}).toArray();
+  res.send(result);
+})
 
 app.get("/", (req, res) => {
     res.send('Hello World!')
