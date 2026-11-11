@@ -30,11 +30,16 @@ app.post('/books', async (req, res) => {
   const result = await booksCollection.insertOne(bookData);
   res.send(result);
 })
-// GET / books — get all books(public) and email filtering
+// GET / books — get all books(public) and email filtering and sorting with limit(query)
 app.get('/books', async (req, res) => {
   const email = req.query.email;
+  const limit = parseInt(req.query.limit) || 0;
   const query = email ? { creatorEmail: email } : {};
-  const result = await booksCollection.find(query).toArray();
+  const result = await booksCollection
+    .find(query)
+    .sort({ _id: -1 })
+    .limit(limit)
+    .toArray();
   res.send(result);
 })
 
@@ -65,9 +70,26 @@ app.get('/books/:id', async (req, res) => {
 })
 
 // POST /borrows — borrow a book
-app.post('/borrows', async(req, res) => {
+app.post('/borrows', async (req, res) => {
   const data = req.body;
+
+  // No Double Borrow Check
+  const alreadyBorrowed = await borrowCollection.findOne({
+    bookId: data.bookId,
+    userEmail: data.userEmail,
+  });
+
+  if (alreadyBorrowed) {
+    return res.status(400).json({
+      message: "You already borrowed this book!"
+    })
+  }
+
   const result = await borrowCollection.insertOne(data);
+  await booksCollection.updateOne(
+    { _id: new ObjectId(data.bookId) },
+    { $inc: { availableCopies: -1 } }
+  );
   res.send(result);
 })
 
@@ -78,10 +100,15 @@ app.get('/borrows', async (req, res) => {
   res.send(result);
 })
 
-// DELETE /borrows/:id — return a book
+// DELETE /borrows/:id — return a book and update available copies count
 app.delete('/borrows/:id', async (req, res) => {
   const id = req.params.id;
+  const borrow = await borrowCollection.findOne({ _id: new ObjectId(id) });
   const result = await borrowCollection.deleteOne({ _id: new ObjectId(id) });
+  await booksCollection.updateOne(
+    { _id: new ObjectId(borrow.bookId) },
+    { $inc: {availableCopies: 1}}
+  )
   res.send(result);
 })
 
